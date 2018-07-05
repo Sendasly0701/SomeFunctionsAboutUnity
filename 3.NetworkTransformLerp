@@ -1,0 +1,37 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Networking;
+
+public class NetworkTransform : NetworkBehaviour {
+
+    public float smoothSpeed;
+
+    [SyncVar] private Vector3 serverToPosition = Vector3.zero;
+    [SyncVar] private Quaternion serverToRotation;
+
+    private void FixedUpdate()
+    {
+        if (isLocalPlayer)
+        {
+            CmdLerpTransform(transform.position, transform.rotation);
+        }
+        else
+        {
+            LerpTransform();
+        }
+    }
+
+    [Command]
+    private void CmdLerpTransform(Vector3 _position, Quaternion _rotation)
+    {
+        serverToPosition = _position;
+        serverToRotation = _rotation;
+    }
+
+    private void LerpTransform()
+    {
+        transform.position = Vector3.Lerp(transform.position, serverToPosition, smoothSpeed * Time.fixedDeltaTime);
+        transform.rotation = Quaternion.Slerp(transform.rotation, serverToRotation, smoothSpeed * Time.fixedDeltaTime);
+    }
+}
