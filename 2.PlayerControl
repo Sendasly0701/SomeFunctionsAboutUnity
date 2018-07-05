@@ -1,0 +1,63 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Networking;
+
+
+public class PlayerController : NetworkBehaviour {
+
+    [SerializeField] private float moveSpeed;
+    [SerializeField] private float rotateSpeed;
+
+    [Header("----------- jump ---------")]
+    [SerializeField] private float jumpHeight;
+    [SerializeField] private float jumpSmooth;
+
+    private Rigidbody rig;
+    public bool jump;
+    // --------------------
+
+    private void Awake()
+    {
+        rig = GetComponent<Rigidbody>();            
+    }
+
+    private void FixedUpdate()
+    {
+        if ( ! isLocalPlayer ) return;
+
+        float horizontal = Input.GetAxis("Horizontal");
+        float vertical = Input.GetAxis("Vertical");
+
+        transform.Translate(Vector3.forward * vertical * moveSpeed * Time.fixedDeltaTime);
+        transform.Rotate(Vector3.up * horizontal * rotateSpeed * Time.fixedDeltaTime);
+
+        // -------- Jump ------------
+        Vector3 velocity = rig.velocity;
+        if (jump)
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                //rig.velocity = new Vector3(velocity.x, jumpHeight, velocity.z);
+                rig.AddForce(new Vector3(0, jumpHeight, 0), ForceMode.Impulse);
+                jump = false;
+            }
+        }
+        //---------------------------
+    }
+
+    /// <summary>
+    /// Jump bool Collision
+    /// </summary>
+    /// <param name="collision"></param>
+    private void OnCollisionEnter(Collision collision)
+    {
+        if(collision.gameObject.tag == "Plane")
+        {
+            Debug.Log("isGround");
+            Debug.Log("bich");
+            jump = true;
+        }            
+    }
+
+}
